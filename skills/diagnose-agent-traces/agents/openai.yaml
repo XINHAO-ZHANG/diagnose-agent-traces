@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnose Agent Traces"
+  short_description: "Find where an ARC-AGI-3 agent run loses time, from its transcripts"
+  default_prompt: "Use $diagnose-agent-traces on this transcripts folder. Tell me the counted results first, then ask me who should annotate."

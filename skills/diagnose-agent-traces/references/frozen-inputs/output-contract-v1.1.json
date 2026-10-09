@@ -1,0 +1,58 @@
+{
+  "milestones": {
+    "K_status": "observed|candidate|unknown|not_reached",
+    "K_completed_actions": "int|null",
+    "K_confidence": "high|medium|low|null",
+    "S_status": "observed|candidate|unknown|not_reached",
+    "S_completed_actions": "int|null",
+    "n_C": "int|null",
+    "n_R": "int|null"
+  },
+  "metrics": {
+    "A_K": "int|null",
+    "P_C": "int|null",
+    "D_K": "int|null",
+    "A_KS": "int|null",
+    "status": "exact|conditional|unknown"
+  },
+  "failure_modes": {
+    "FM1_REPEATED_EXPLORATION": {
+      "present": "true|false|null",
+      "confidence": "high|medium|low|null",
+      "steps": "e.g. '12-20' or null",
+      "cost_actions": "int|null",
+      "evidence": [
+        {
+          "record_id": "TXT record id, or omit",
+          "step": "int (reference step) or omit",
+          "quote": "verbatim substring of raw_excerpt, or omit",
+          "observation": "grounded observation, or omit"
+        }
+      ],
+      "rationale": "string"
+    },
+    "FM2_FEEDBACK_NOT_USED": "same object shape",
+    "FM3_NO_REVISION_AFTER_CONTRADICTION": "same object shape",
+    "FM4_POST_K_DELAY": "same object shape",
+    "FM5_EXECUTION_DEVIATION": "same object shape",
+    "FM6_TOOL_OR_STATE_ERROR": "same object shape"
+  },
+  "other_labels": [
+    {
+      "label": "free English label",
+      "episode_ids": []
+    }
+  ],
+  "notes": "uncertainties, truncation or missing-context limits",
+  "reasoning_waste": [
+    {
+      "record_id": "TXT record id (or omit)",
+      "steps": "reference step or range like '3-7' (or omit)",
+      "allocation": {
+        "RW_PRODUCTIVE": 0.5,
+        "RW_BOARD_REDESCRIBE": 0.5
+      },
+      "quote": "short verbatim substring for the dominant non-productive category, or null"
+    }
+  ]
+}
