@@ -157,10 +157,24 @@ def main(argv=None):
             s = run['games'][g]; y = s['categories'].get('no_action_turn_budget_yield', {'seconds': 0})['seconds']
             L.append(f'| {g} | {s["levels_completed"]}/{s["n_levels"]} | {s["final_wallclock_s"]:,} | {y:,} | {pct(y / s["final_wallclock_s"])} |')
     # ---- waste
-    L += ['', '## Result 2: reasoning waste', '', 'Share of the labeled wall-clock time (annotator pass ' + a.pass_name + '):', '', '| Category | Share |', '|---|---|']
-    for c in CATS:
-        L.append(f'| {NAME[c]} | {pct(sh[c])} |')
-    L.append(f'| **not productive** | {pct(nps)} |')
+    L += ['', '## Result 2: reasoning waste', '', f'Share of the labeled wall-clock time (annotator pass {a.pass_name}).']
+    if ag:
+        L += ['Kappa is the agreement between two independent passes on the top category of each turn (' + f'{ag["turns"]} turns). "Use" is yes when kappa reaches {mk}.', '',
+              '| Category | Share | Kappa | Use |', '|---|---|---|---|']
+        for c in CATS:
+            k = ag['rw_category_kappa'].get(c)
+            k_txt = 'n/a' if k is None else '%.2f' % k
+            use = 'yes' if trusted_cat(c) else ('no' if k is not None else 'n/a')
+            L.append(f'| {NAME[c]} | {pct(sh[c])} | {k_txt} | {use} |')
+        r_txt = 'n/a' if ag['nonprod_r'] is None else '%.2f' % ag['nonprod_r']
+        L.append(f'| **not productive** | {pct(nps)} | r = {r_txt} | see note |')
+        L += ['', 'For the total "not productive", r is the correlation of the not-productive share of a turn between the two passes. '
+              'The total is steadier than the single categories: a turn can move between two not-productive categories and still count as not productive.']
+    else:
+        L += ['There is no second pass, so there is no agreement number.', '', '| Category | Share |', '|---|---|']
+        for c in CATS:
+            L.append(f'| {NAME[c]} | {pct(sh[c])} |')
+        L.append(f'| **not productive** | {pct(nps)} |')
     if pm:
         L += ['', f'## Result 3: comparison with {a.base_name}', '', f'Paired levels: {an["paired_levels"]}. Difference = run minus base, paired bootstrap over levels.', '',
               '| Measure | Difference | 95% interval | Levels |', '|---|---|---|---|']
@@ -171,7 +185,7 @@ def main(argv=None):
         if pa:
             L.append(f'\nActions on paired levels: run {pa["run"]}, base {pa["base"]}, net {pa["run"] - pa["base"]:+d}.')
     # ---- failure modes
-    L += ['', f'## Result {4 if pm else 3}: failure modes', '', 'present / assessed. "Use" is yes when the kappa between two passes reaches ' + f'{mk}.', '', '| Code | Run | Kappa | Use |', '|---|---|---|---|']
+    L += ['', f'## Result {4 if pm else 3}: failure modes', '', 'present / assessed. Kappa is the agreement between two independent passes (1 is full agreement, 0 is the same as chance). "Use" is yes when kappa reaches ' + f'{mk}.', '', '| Code | Run | Kappa | Use |', '|---|---|---|---|']
     for c, v in an['fm_run'].items():
         k = ag['fm'][c]['kappa'] if ag else None
         L.append(f'| {c} | {v["present"]}/{v["assessed"]} | {"n/a" if k is None else f"{k:.2f}"} | {"yes" if trusted_fm(c) else "no"} |')

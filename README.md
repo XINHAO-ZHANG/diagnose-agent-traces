@@ -109,15 +109,19 @@ An excerpt, shortened, from a real run (25 games, annotated with a language mode
 
 ## Result 2: reasoning waste
 
-| Category | Share |
-|---|---|
-| productive | 34.6% |
-| over-deliberation | 28.4% |
-| re-derive | 10.6% |
-| ... | ... |
-| **not productive** | 65.3% |
+Kappa is the agreement between two independent passes on the top category of each turn (987 turns). "Use" is yes when kappa reaches 0.5.
+
+| Category | Share | Kappa | Use |
+|---|---|---|---|
+| productive | 34.6% | 0.57 | yes |
+| over-deliberation | 28.4% | 0.50 | yes |
+| re-derive | 10.6% | 0.22 | no |
+| ... | ... | ... | ... |
+| **not productive** | 65.3% | r = 0.76 | see note |
 
 ## Result 3: failure modes
+
+present / assessed. Kappa is the agreement between two independent passes (1 is full agreement, 0 is the same as chance).
 
 | Code | Run | Kappa | Use |
 |---|---|---|---|
