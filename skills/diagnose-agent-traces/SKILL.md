@@ -137,7 +137,8 @@ Examples, not tested here:
 | `scripts/compare_formats.py` | Compares two annotation formats by the agreement between two passes. |
 | `tests/` | `smoke_test.sh` runs every stage on a made-up sample run, with a test double instead of a model. |
 
-Format v1.1 (shares and one quote per turn) is the default and gives all the numbers.
+**Decision (2026-10-09): use format v1.1 for every run.** It keeps the results comparable with the earlier analysis and with each other. Compare two runs only when both used v1.1 (the guard checks the prompt hash).
+Format v1.1 (shares and one quote per turn) is the default and gives all the numbers. The other formats (v1.2, v1.3, v1.3b) are experiments.
 Format v1.2 (summary, shares, reason) was not shown to agree as well ([format-trial.md](references/format-trial.md)).
 Format v1.3 (the v1.1 output with a longer guide: a decision order, 'counts / does not count' rules, real examples) is a draft. In one trial it moved the not-productive share of a turn by -21 points, without a clear gain in agreement. An ablation (v1.3b) without two generous statements brought the share back near v1.1, but the agreement was lower than v1.1 ([format-trial.md](references/format-trial.md)). v1.1 stays the default. Choose with a human gold set.
 

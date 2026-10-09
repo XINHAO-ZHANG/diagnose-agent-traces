@@ -133,3 +133,8 @@ What the numbers say:
 Conclusion for now: a longer guide with a decision order and examples did **not** improve the agreement, and its wording moves the headline number a lot.
 v1.1 stays the default. The comparison that decides is the one with the human gold set (`score_gold.py`).
 Total spent on the format trials: $1.27.
+
+## Decision
+
+2026-10-09: v1.1 is the format for all runs. Reason: consistency. The longer guides (v1.3, v1.3b) did not improve the agreement, and their wording moves the headline number.
+The formats v1.2, v1.3 and v1.3b stay in the repository as experiments. A new prompt version needs a human gold set (`score_gold.py` in the analysis folder of the original project) before it replaces v1.1.
