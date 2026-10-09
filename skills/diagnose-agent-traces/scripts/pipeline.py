@@ -43,7 +43,7 @@ def main(argv=None):
     ap.add_argument('--passes', default='G1,G2', help='names of the annotation passes; the first is the main one')
     ap.add_argument('--budget-usd', type=float, default=8.0)
     ap.add_argument('--annotate', action='store_true', help='spend money: run the annotation')
-    ap.add_argument('--format', default='v1.1', choices=['v1.1', 'v1.2'], help='annotation format (v1.2 adds a summary and a reason per turn)')
+    ap.add_argument('--format', default='v1.1', choices=['v1.1', 'v1.2', 'v1.3'], help='annotation format (v1.2 adds a summary and a reason per turn)')
     ap.add_argument('--no-example-summaries', action='store_true',
                     help='do not make the extra v1.2 pass that writes the turn summaries of the example level')
     ap.add_argument('--games'); ap.add_argument('--agent'); ap.add_argument('--level'); ap.add_argument('--time-limit-s', default='7920')

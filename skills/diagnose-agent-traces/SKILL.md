@@ -139,6 +139,7 @@ Examples, not tested here:
 
 Format v1.1 (shares and one quote per turn) is the default and gives all the numbers.
 Format v1.2 (summary, shares, reason) was not shown to agree as well ([format-trial.md](references/format-trial.md)).
+Format v1.3 (the v1.1 output with a longer guide: a decision order, 'counts / does not count' rules, real examples) is a draft. It has not been tested yet.
 
 ## References
 
