@@ -139,7 +139,7 @@ Examples, not tested here:
 
 Format v1.1 (shares and one quote per turn) is the default and gives all the numbers.
 Format v1.2 (summary, shares, reason) was not shown to agree as well ([format-trial.md](references/format-trial.md)).
-Format v1.3 (the v1.1 output with a longer guide: a decision order, 'counts / does not count' rules, real examples) is a draft. In one trial it moved the not-productive share of a turn by -21 points, without a clear gain in agreement ([format-trial.md](references/format-trial.md)). Choose between v1.1 and v1.3 with a human gold set.
+Format v1.3 (the v1.1 output with a longer guide: a decision order, 'counts / does not count' rules, real examples) is a draft. In one trial it moved the not-productive share of a turn by -21 points, without a clear gain in agreement. An ablation (v1.3b) without two generous statements brought the share back near v1.1, but the agreement was lower than v1.1 ([format-trial.md](references/format-trial.md)). v1.1 stays the default. Choose with a human gold set.
 
 ## References
 

@@ -94,3 +94,42 @@ differs by more than 10 points between two formats.
 
 Consequence for the headline number: the share of not-productive reasoning in a report depends on the prompt wording. Compare runs only inside one prompt
 version, and choose the version with the human gold set.
+
+## Ablation of v1.3: remove two statements (format v1.3b, 2026-10-09)
+
+Question: did two statements of v1.3 make the annotator generous? We removed:
+(a) "Any agent that starts without knowing the rules must explore and make mistakes: a test that gives new information is not waste, even if the hypothesis was wrong";
+(b) in step 1 of the decision order, the clause "or form a hypothesis or plan that the agent then tests or executes", and the sentence "A wrong hypothesis that is tested with a clear experiment is productive".
+Everything else is the same as v1.3. Same 10 units, same model. Two new passes (B1, B2). Cost: $0.31.
+
+Mean share of a turn, by prompt and pass (10 units, 53 turns):
+
+| Prompt | Productive | Over-deliberation | Re-derive | Board re-describe | Discarded | Tool debug | Lock-in | Not productive |
+|---|---|---|---|---|---|---|---|---|
+| v1.1, pass 1 | 56.2% | 17.3% | 5.3% | 9.7% | 5.2% | 2.7% | 3.7% | 43.8% |
+| v1.1, pass 2 | 54.3% | 16.2% | 6.3% | 8.5% | 7.5% | 5.6% | 1.5% | 45.7% |
+| v1.3, pass 1 | 77.2% | 1.8% | 9.5% | 3.3% | 6.8% | 1.0% | 0.4% | 22.8% |
+| v1.3, pass 2 | 74.4% | 4.5% | 9.3% | 5.1% | 5.3% | 1.3% | 0.0% | 25.6% |
+| v1.3b, pass 1 | 58.9% | 6.9% | 16.0% | 7.7% | 8.3% | 1.2% | 0.8% | 41.1% |
+| v1.3b, pass 2 | 64.8% | 7.8% | 11.0% | 7.8% | 6.3% | 1.9% | 0.4% | 35.2% |
+
+Agreement between the two passes of each prompt:
+
+| Prompt | Top-category kappa | Top-category agreement | Correlation of the not-productive share | Failure-mode macro kappa |
+|---|---|---|---|---|
+| v1.1 | 0.46 | 0.75 | 0.83 | 0.60 |
+| v1.3 | 0.35 | 0.91 | 0.82 | 0.61 |
+| v1.3b | 0.06 | 0.70 | 0.69 | 0.64 |
+
+What the numbers say:
+- **The guess is confirmed.** Without the two statements, the not-productive share is back near v1.1 (41% and 35%, against 44% and 46%). The two statements caused most of the 21-point fall.
+- **Two other effects remain in v1.3b.** (1) Over-deliberation fell from 17% to 7% and re-derive rose from 5% to 11 to 16%. The tie-break rule
+  "repeating a computation is re-derive even if it also delays the action" moves turns from one category to the other. This is a change of definition, not noise.
+  (2) The passes differ more from each other (not-productive share 41% and 35%, against 44% and 46% for v1.1).
+- **Agreement is worse, not better.** The top-category kappa is 0.06 and the correlation of the share is 0.69. The longer guide did not make the labels more stable on these units.
+  The failure-mode kappa is the same as before (0.60 to 0.64).
+- The sample is small (10 units, 53 turns). A change of 0.1 in kappa is inside the noise of this size. A change from 0.46 to 0.06 is probably not.
+
+Conclusion for now: a longer guide with a decision order and examples did **not** improve the agreement, and its wording moves the headline number a lot.
+v1.1 stays the default. The comparison that decides is the one with the human gold set (`score_gold.py`).
+Total spent on the format trials: $1.27.

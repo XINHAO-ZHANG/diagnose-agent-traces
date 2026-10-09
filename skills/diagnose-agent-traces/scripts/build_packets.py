@@ -17,7 +17,8 @@ from lib import find_transcript, load_benchmark, parse_records, stamp_s
 FROZEN = Path(__file__).resolve().parents[1] / 'references' / 'frozen-inputs'
 FORMATS = {'v1.1': ('annotator-prompt-v1.1.md', 'output-contract-v1.1.json'),   # shares and one quote per turn
            'v1.2': ('annotator-prompt-v1.2.md', 'output-contract-v1.2.json'),   # summary, shares, reason, quote per turn
-           'v1.3': ('annotator-prompt-v1.3.md', 'output-contract-v1.1.json')}   # v1.1 output, longer guide with real examples
+           'v1.3': ('annotator-prompt-v1.3.md', 'output-contract-v1.1.json'),   # v1.1 output, longer guide with real examples
+           'v1.3b': ('annotator-prompt-v1.3b.md', 'output-contract-v1.1.json')}  # v1.3 without two generous statements (ablation)
 COMMON = ['addendum-full-traces.md', 'protocol.md', 'codebook-fm-v0.1.md']
 FORMAT = ('TXT tool-agent transcript, FULL (untruncated); a record = one agent turn; '
           'Step k = k-th environment action of this level')  # frozen text: a change gives a new prompt, so keep it
