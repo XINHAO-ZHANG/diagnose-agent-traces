@@ -171,7 +171,7 @@ def main(argv=None):
         if pa:
             L.append(f'\nActions on paired levels: run {pa["run"]}, base {pa["base"]}, net {pa["run"] - pa["base"]:+d}.')
     # ---- failure modes
-    L += ['', '## Result 4: failure modes', '', 'present / assessed. "Use" is yes when the kappa between two passes reaches ' + f'{mk}.', '', '| Code | Run | Kappa | Use |', '|---|---|---|---|']
+    L += ['', f'## Result {4 if pm else 3}: failure modes', '', 'present / assessed. "Use" is yes when the kappa between two passes reaches ' + f'{mk}.', '', '| Code | Run | Kappa | Use |', '|---|---|---|---|']
     for c, v in an['fm_run'].items():
         k = ag['fm'][c]['kappa'] if ag else None
         L.append(f'| {c} | {v["present"]}/{v["assessed"]} | {"n/a" if k is None else f"{k:.2f}"} | {"yes" if trusted_fm(c) else "no"} |')

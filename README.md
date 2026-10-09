@@ -36,6 +36,127 @@ Where each tool reads skills: [Cursor](https://cursor.com/docs/skills), [Codex](
 
 Requirements for the skill itself: Python 3.8 or newer. No packages.
 
+## How it works
+
+```
+ INPUT                        STAGES                                              OUTPUT
+
+ run folder ─┐              ┌──────────────────────────────────────┐
+ benchmark.json             │ 0  Check the data              free  │  stops here if a game fails
+ transcripts/  ├───────────►│    transcripts parse, no cut text,   │
+ baseline ───┘  (optional)  │    reasoning text is there           │
+                            └───────────────────┬──────────────────┘
+                                                ▼
+                            ┌──────────────────────────────────────┐
+                            │ 1  Count the time              free  │──►  STAGE1.md
+                            │    turns with no action, yields,     │     (counted results,
+                            │    read timeouts, actions per level  │      no model)
+                            └───────────────────┬──────────────────┘
+                                                ▼
+                            ┌──────────────────────────────────────┐
+                            │ 2a Cut each level into a packet free │  full text, nothing cut
+                            └───────────────────┬──────────────────┘
+                                                ▼
+                            ┌──────────────────────────────────────┐   the agent asks you who annotates:
+                            │ 2b Annotate (a language model)  paid │    A  the agent itself (sub-agents)
+                            │    per turn: shares of waste types   │    B  another agent program
+                            │    per level: 6 failure-mode codes   │       (cursor-agent, claude -p, codex exec)
+                            │    base first, then the run;         │    C  nobody: stop after stage 1
+                            │    two independent passes            │
+                            └───────────────────┬──────────────────┘
+                                                ▼
+                            ┌──────────────────────────────────────┐
+                            │ 3  Statistics                  free  │──►  ANALYSIS.md, analysis.json
+                            │    shares, run vs baseline with      │
+                            │    95% intervals, agreement between  │
+                            │    the two passes (what to trust)    │
+                            └───────────────────┬──────────────────┘
+                                                ▼
+                            ┌──────────────────────────────────────┐
+                            │ 4  Report                      free  │──►  REPORT.md  (English)
+                            └──────────────────────────────────────┘
+```
+
+Stages 0, 1, 3 and 4 use no model. Only stage 2b uses a language model. You can stop after stage 1 and keep the counted results.
+The command `python3 scripts/pipeline.py` runs all stages. It spends nothing until you add `--annotate`.
+
+## What the report looks like
+
+An excerpt, shortened, from a real run (25 games, annotated with a language model; the numbers are from that run):
+
+````markdown
+# Failure tracing: where the example run loses time
+
+## Summary
+
+- 49.1% of the wall-clock (92,434 of 188,427 s, all games) goes to turns with no game action
+  (turn-budget yields, read timeouts and the final stop). 292 turns end in a turn-budget yield and 30 in a read timeout.
+- 23 of 25 games used the whole time limit.
+- 65.3% of the labeled reasoning time is not productive. The largest category is over-deliberation (28.4%).
+
+## Data and annotation
+
+- Reasoning text: 25 of 25 games have the full reasoning text.
+- run: 91 of 91 units annotated; 168 of 207 quotes are verbatim; the annotator used tools on 0 units.
+
+## Result 1: time without action (counted, no annotator)
+
+| Category | Turns | Seconds | Share of wall-clock |
+|---|---|---|---|
+| action_turn | 717 | 96,003 | 50.9% |
+| no_action_turn_budget_yield | 292 | 75,103 | 39.9% |
+| request_timeout | 30 | 16,317 | 8.7% |
+
+## Result 2: reasoning waste
+
+| Category | Share |
+|---|---|
+| productive | 34.6% |
+| over-deliberation | 28.4% |
+| re-derive | 10.6% |
+| ... | ... |
+| **not productive** | 65.3% |
+
+## Result 3: failure modes
+
+| Code | Run | Kappa | Use |
+|---|---|---|---|
+| FM2_FEEDBACK_NOT_USED | 27/85 | 0.65 | yes |
+| FM3_NO_REVISION_AFTER_CONTRADICTION | 3/91 | 0.22 | no |
+| FM6_TOOL_OR_STATE_ERROR | 78/91 | 1.00 | yes |
+
+## Example level
+
+**ft09 level 6.** Turns r24 to r27 took 1,239 s (52% of the level) and had 1 action.
+
+```
+ time bar: 1 character = 30 s.   █ = turn with action(s)   · = turn with no action
+  r16     r17      r18         r21  r22          r24  r25    r26              r27
+ |███████|········|······|█|██|████|··········|█|····|██████|················|···············|
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+
+| Turn | Time | Actions | What the turn is about | Shares | Quote |
+|---|---|---|---|---|---|
+| r24 | 122 s | 0 (yield) | The agent sees an apparent target match without completion and explores many alternative win conditions. | O 45, D 40, P 15 | "I'm stuck on theory." |
+| r26 | 472 s | 0 (yield) | The agent rejects several hypotheses and plans tests of alternate target interpretations. | O 65, D 20, P 15 | |
+| r27 | 461 s | 0 (yield) | The agent revisits the hint mapping, finds transcription mistakes in two cells, and computes the correction. | P 45, O 35, R 20 | |
+
+## What this means (suggested rows; a human must check them)
+
+| Finding | Evidence | Action |
+|---|---|---|
+| 49.1% of wall-clock is in turns with no action | Counted. Strong. | Limit the reasoning per turn. |
+| FM2 (feedback not used) in 27 of 85 levels | Labeled. Two passes agree. | Compare prediction and result after each step. |
+
+## Limits (generated from the checks)
+
+- Failure-mode codes below the trust threshold: ['FM3_NO_REVISION_AFTER_CONTRADICTION'].
+- The labels come from a language model. Use the counted results for decisions.
+````
+
+The report is a draft. The script writes the numbers and the facts. You edit "What this means" and add what the agent does in each phase of the example level.
+
 ## Use
 
 In the agent, say for example:
