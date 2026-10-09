@@ -43,7 +43,7 @@ Requirements for the skill itself: Python 3.8 or newer. No packages.
 
  run folder ───────┐        ┌──────────────────────────────────────┐
  (benchmark.json,  │        │ 0  Check the data              free  │  stops here if a game fails
-  transcripts/)    ├─────────►│    transcripts parse, no cut text,   │
+  transcripts/)    ├───────►│    transcripts parse, no cut text,   │
  baseline ─────────┘        │    reasoning text is there           │
  (optional)                 └───────────────────┬──────────────────┘
                                                 ▼
