@@ -3,7 +3,9 @@ Usage: python3 compare_formats.py --a-dirs ANN_G1,ANN_G2 --b-dirs ANN_G1,ANN_G2 
 Each --*-dirs is two annotation directories (with units/) of the same format: two independent passes.
 It measures the agreement between the two passes inside each format, on the units that all four directories have.
 Rule, fixed before the test: keep format B if its top-category kappa and its failure-mode macro kappa are
-each at least (those of A minus the tolerance), and at least 90% of its turns have a summary and a reason."""
+each at least (those of A minus the tolerance). If format B has summary fields, at least 90% of its turns must have a summary and a reason.
+If the mean not-productive share of a turn differs by more than 0.10 between the formats, the rule does not decide:
+the two formats draw the line between productive and not productive in different places. Use a human gold set to choose."""
 import argparse
 import json
 import sys
@@ -36,6 +38,11 @@ def main(argv=None):
         return sum(ann['rw'][u].get('cost_usd') or 0 for u in common)
     ca = [cover(x) for x in B]
     cov = sum(c[0] for c in ca) / max(1, sum(c[1] for c in ca))
+    has_sum = any(x.get('summary') for u in common for x in B[0]['rw'][u]['reasoning_waste'])
+    def mean_np(ann):
+        v = [1 - x['allocation'].get('RW_PRODUCTIVE', 0) for u in common for x in ann['rw'][u]['reasoning_waste']]
+        return sum(v) / len(v) if v else None
+    shift = (mean_np(B[0]) or 0) - (mean_np(A[0]) or 0)
     # per-turn difference of the not-productive share between the two formats (same pass index)
     diffs = []
     for i in (0, 1):
@@ -45,7 +52,7 @@ def main(argv=None):
             diffs += [db[r] - da[r] for r in set(da) & set(db)]
     f = lambda x: 'n/a' if x is None else f'{x:.2f}'
     keep_b = (gb['dominant_kappa'] is not None and ga['dominant_kappa'] is not None and gb['dominant_kappa'] >= ga['dominant_kappa'] - a.tolerance
-              and gb['fm_macro_kappa'] >= ga['fm_macro_kappa'] - a.tolerance and cov >= 0.9)
+              and gb['fm_macro_kappa'] >= ga['fm_macro_kappa'] - a.tolerance and (cov >= 0.9 or not has_sum))
     L = ['# Format comparison', '', f'Units that all four passes have: {len(common)}. Turns: A {ga["turns"]}, B {gb["turns"]}.',
          'This is a small test. Read the numbers as a check, not as a proof.', '',
          '| Measure | Format A | Format B |', '|---|---|---|',
@@ -54,13 +61,16 @@ def main(argv=None):
          f'| Not-productive share, correlation between passes | {f(ga["nonprod_r"])} | {f(gb["nonprod_r"])} |',
          f'| Failure-mode macro kappa | {f(ga["fm_macro_kappa"])} | {f(gb["fm_macro_kappa"])} |',
          f'| Failure-mode pooled kappa | {f(ga["fm_pooled_kappa"])} | {f(gb["fm_pooled_kappa"])} |',
+         f'| Mean not-productive share of a turn (pass 1) | {mean_np(A[0]):.1%} | {mean_np(B[0]):.1%} |',
          f'| Mean output tokens per unit (pass 1) | {out_tokens(A[0]):.0f} | {out_tokens(B[0]):.0f} |',
          f'| Cost of the two passes on these units | ${cost(A[0]) + cost(A[1]):.3f} | ${cost(B[0]) + cost(B[1]):.3f} |', '',
-         f'Turns of format B with a summary and a reason: {cov:.0%}.',
+         (f'Turns of format B with a summary and a reason: {cov:.0%}.' if has_sum else 'Format B has no summary fields.'),
          f'Mean change of the not-productive share per turn, B minus A (same pass index): {sum(diffs) / len(diffs):+.3f} over {len(diffs)} turns.' if diffs else '',
-         '', f'Rule (tolerance {a.tolerance}): **{"keep format B" if keep_b else "do not switch to format B"}**.']
+         '', (f'The mean not-productive share moved by {shift:+.1%} between the formats. This is larger than 10 points: **the rule does not decide.** '
+              'The formats draw the line in different places. Compare each one with the human gold set.' if abs(shift) > 0.10 else
+              f'Rule (tolerance {a.tolerance}): **{"keep format B" if keep_b else "do not switch to format B"}**.')]
     Path(a.out).write_text('\n'.join(L) + '\n'); print('\n'.join(L))
-    return 0 if keep_b else 1
+    return 0 if (keep_b and abs(shift) <= 0.10) else 1
 
 
 if __name__ == '__main__':

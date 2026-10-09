@@ -63,3 +63,34 @@ Result by the rule: **do not switch to format B**. Top-category kappa is 0.13 lo
 - Do not mix v1.1 and v1.2 labels in one comparison.
 - Option 1 (cheap): use v1.1 for all numbers. Use v1.2 only for the few levels that you show as examples, to get readable summaries. Say in the report that the summaries come from a second format.
 - Option 2: a larger trial. About 30 units, two passes, would cost about $2. It could decide a difference of 0.1. It cannot decide 0.05.
+
+## Trial of format v1.3 (2026-10-09)
+
+Format v1.3 keeps the output of v1.1 and adds a longer guide to the prompt: a decision order, "counts / does not count" rules, and real examples.
+Same 10 units, same model, same A passes (v1.1). Two new passes of v1.3 (V13A, V13B). Cost of the two passes: $0.32.
+
+| Measure | A (v1.1) | B (v1.3) |
+|---|---|---|
+| Top-category kappa between the two passes | 0.46 | 0.35 |
+| Top-category agreement | 0.75 | 0.91 |
+| Not-productive share, correlation between passes | 0.83 | 0.82 |
+| Failure-mode macro kappa | 0.60 | 0.61 |
+| Mean not-productive share of a turn (pass 1) | **43.8%** | **22.8%** |
+| Mean output tokens per unit (pass 1) | 4,113 | 4,954 |
+
+What the numbers say:
+- **The guide moved the line between productive and not productive.** The not-productive share of a turn fell by 21 points on these units
+  (productive 56% to 77%, over-deliberation 17% to 2%). The noise between two passes of one prompt is about 3 points. So the prompt is a much larger
+  source of change than the annotator noise.
+- Agreement did not improve in a clear way. The raw agreement on the top category rose (0.75 to 0.91) only because most turns are now "productive".
+  The chance-corrected kappa fell (0.46 to 0.35), and the kappa of most not-productive categories fell to 0 or is undefined (they are almost never the top category).
+  The failure-mode kappa did not change (0.60 and 0.61).
+- We cannot say which format is right. Only a human gold set can say which line is closer to a person.
+- Why it moved is not tested. One guess: the sentences "a test that gives new information is not waste" and step 1 of the decision order
+  (hypothesis or plan -> productive) make the annotator more generous. Test this by removing them and running again.
+
+Status: v1.3 stays a draft. The default stays v1.1. `compare_formats.py` now says "the rule does not decide" when the mean not-productive share
+differs by more than 10 points between two formats.
+
+Consequence for the headline number: the share of not-productive reasoning in a report depends on the prompt wording. Compare runs only inside one prompt
+version, and choose the version with the human gold set.
