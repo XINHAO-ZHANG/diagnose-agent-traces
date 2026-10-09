@@ -41,11 +41,11 @@ Requirements for the skill itself: Python 3.8 or newer. No packages.
 ```
  INPUT                        STAGES                                              OUTPUT
 
- run folder ─┐              ┌──────────────────────────────────────┐
- benchmark.json             │ 0  Check the data              free  │  stops here if a game fails
- transcripts/  ├───────────►│    transcripts parse, no cut text,   │
- baseline ───┘  (optional)  │    reasoning text is there           │
-                            └───────────────────┬──────────────────┘
+ run folder ───────┐        ┌──────────────────────────────────────┐
+ (benchmark.json,  │        │ 0  Check the data              free  │  stops here if a game fails
+  transcripts/)    ├─────────►│    transcripts parse, no cut text,   │
+ baseline ─────────┘        │    reasoning text is there           │
+ (optional)                 └───────────────────┬──────────────────┘
                                                 ▼
                             ┌──────────────────────────────────────┐
                             │ 1  Count the time              free  │──►  STAGE1.md
