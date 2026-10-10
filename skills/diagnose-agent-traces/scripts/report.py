@@ -56,7 +56,7 @@ def stretch(turns, max_actions=1, min_len=3):
     return best
 
 
-def pick_example(run_packets, level=None):
+def pick_example(run_packets, level=None, ann_dir=None):
     """The unit for the example: the one with the longest stretch of at most 1 action (or the level given as GAME:LEVEL).
     Returns (uid, unit, turns, stretch) or None."""
     units = {u['uid']: u for u in load(Path(run_packets) / 'units.json')['units']}
@@ -64,6 +64,8 @@ def pick_example(run_packets, level=None):
     for uid, u in units.items():
         if level and f'{u["game_id"]}:{u["level"]}' != level:
             continue
+        if ann_dir is not None and not (Path(ann_dir) / 'units' / f'{uid}.rw.json').exists():
+            continue       # a unit without an annotation cannot be the example
         try:
             turns = load_turns(run_packets, uid)
         except StopIteration:
@@ -195,14 +197,14 @@ def main(argv=None):
         for r in csv.DictReader(fh):
             if r['run'] == 'run':
                 cells[(r['uid'], r['record'])][r['category']] = float(r['frac'])
-    ex = pick_example(a.run_packets, a.level)
+    ann_dir = Path(a.ann_dir) if a.ann_dir else Path(a.run_packets) / 'annotations' / a.pass_name
+    ex = pick_example(a.run_packets, a.level, ann_dir)
     L += ['', '## Example level']
     if not ex:
         L += ['', 'No level has a stretch of 3 or more turns with at most 1 action.']
     else:
         uid, u, turns, st = ex
         lvl_total = sum(t['wall'] or 0 for t in turns)
-        ann_dir = Path(a.ann_dir) if a.ann_dir else Path(a.run_packets) / 'annotations' / a.pass_name
         rw = {x['record_id']: x for x in load(ann_dir / 'units' / f'{uid}.rw.json')['reasoning_waste']}
         i, j, w, acts = st
         known = sum(t['actions'] or 0 for t in turns)
