@@ -56,7 +56,7 @@ def backend_command(args, fn, msg, raw, prices, outd):
 def backend_manual(args, fn, msg, raw, prices, outd):
     stem = fn[:-5]
     req, ans = outd / 'requests' / f'{stem}.txt', outd / 'answers' / f'{stem}.json'
-    if '__c' in stem:
+    if re.search(r'__c\d+of\d+$', stem):      # a chunk file, not a game id that starts with c (cn04, cd82)
         raise RuntimeError('this unit is split in chunks. The manual backend does not support chunks. Use another backend, or build the packets with a larger --max-input-tokens')
     if not ans.exists():
         req.parent.mkdir(parents=True, exist_ok=True)

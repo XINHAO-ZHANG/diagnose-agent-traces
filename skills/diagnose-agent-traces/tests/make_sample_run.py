@@ -12,7 +12,7 @@ GAMES = {
     'aa11-00000001': {'state': 'gave_up', 'levels': [[(2, 'ok', 60), (0, 'yield', 120), (3, 'ok', 40)],
                                                      [(0, 'yield', 150), (0, 'yield', 130), (4, 'ok', 50)],
                                                      [(0, 'yield', 300), (0, 'yield', 280), (0, 'timeout', 900)]], 'completed': 2},
-    'bb22-00000002': {'state': 'won', 'levels': [[(1, 'ok', 30), (2, 'ok', 45)], [(3, 'ok', 60)]], 'completed': 2},
+    'cd22-00000002': {'state': 'won', 'levels': [[(1, 'ok', 30), (2, 'ok', 45)], [(3, 'ok', 60)]], 'completed': 2},
 }
 THINK = ["The board has a blue block at the top left. I will move it right and look at the result.",
          "The last move changed nothing. Let me list the objects again: blue block, red block, a gray wall. The goal may be to reach the red block.",
