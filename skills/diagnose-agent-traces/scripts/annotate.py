@@ -53,15 +53,70 @@ def backend_command(args, fn, msg, raw, prices, outd):
     return AL.parse_json(out), info
 
 
+PART_CHARS = 40000    # one part must fit in one Read of an agent (about 25,000 tokens)
+WRAP = 1200           # the Read tool of some agents cuts very long lines
+
+
+def wrap(text):
+    out = []
+    for line in text.split('\n'):
+        while len(line) > WRAP:
+            out.append(line[:WRAP]); line = line[WRAP:]
+        out.append(line)
+    return '\n'.join(out)
+
+
+def render_packet(pk):
+    """The unit packet as readable text (real line breaks), in blocks. Same content as the JSON packet."""
+    ex = pk['raw_excerpt']
+    head = ['UNIT: ' + json.dumps(pk['unit'], ensure_ascii=False), 'FORMAT: ' + ex.get('format', '')]
+    if pk.get('chunk'):
+        head.append('CHUNK: ' + json.dumps(pk['chunk']))
+    blocks = ['\n'.join(head)]
+    for r in ex.get('records', []):
+        b = [f"##### {r['record_id']} | source line {r['source_line']} | time {r['timestamp']}",
+             'turn_stats: ' + json.dumps(r['turn_stats']),
+             f"level_steps_executed_in_this_record: {r['level_steps_executed_in_this_record']} | completed_actions_at_record_start: {r['completed_actions_at_record_start']}"]
+        for s in r['sections']:
+            b.append(f"[section {s['section_index']}: {s['kind']} | source line {s['source_line']}]")
+            b.append(s['text'])
+        blocks.append(wrap('\n'.join(b)))
+    if ex.get('completion_boundary'):
+        cb = ex['completion_boundary']
+        blocks.append(wrap(f"##### COMPLETION BOUNDARY {cb['record_id']} ({cb['note']})\n" + (cb.get('user_prompt') or '')))
+    return blocks
+
+
+def write_manual_request(outd, stem, msg):
+    """Write the instructions as one file and the packet as numbered parts, so that an agent can read all of it."""
+    marker = '\n\n## UNIT PACKET\n\n'
+    head, packet_json = msg.split(marker, 1)
+    blocks = render_packet(json.loads(packet_json))
+    parts, cur, size = [], [], 0
+    for b in blocks:
+        if cur and size + len(b) > PART_CHARS:
+            parts.append(cur); cur, size = [], 0
+        cur.append(b); size += len(b) + 2
+    parts.append(cur)
+    req = outd / 'requests'
+    req.mkdir(parents=True, exist_ok=True)
+    names = [f'{stem}.packet.{i:02d}.txt' for i in range(1, len(parts) + 1)]
+    for n, part in zip(names, parts):
+        (req / n).write_text('\n\n'.join(part) + '\n', encoding='utf-8')
+    (req / f'{stem}.txt').write_text(
+        head + marker + 'The unit packet is in the files below, in the same folder. Read ALL of them, in this order. '
+        'Long lines were wrapped: a quote must not cross a wrapped line break. Each file starts where the previous one stopped.\n'
+        + '\n'.join(f'- {n}' for n in names) + '\n', encoding='utf-8')
+
+
 def backend_manual(args, fn, msg, raw, prices, outd):
     stem = fn[:-5]
     req, ans = outd / 'requests' / f'{stem}.txt', outd / 'answers' / f'{stem}.json'
     if re.search(r'__c\d+of\d+$', stem):      # a chunk file, not a game id that starts with c (cn04, cd82)
         raise RuntimeError('this unit is split in chunks. The manual backend does not support chunks. Use another backend, or build the packets with a larger --max-input-tokens')
     if not ans.exists():
-        req.parent.mkdir(parents=True, exist_ok=True)
         if not req.exists():
-            req.write_text(msg, encoding='utf-8')
+            write_manual_request(outd, stem, msg)
         raise Pending(stem)
     return AL.parse_json(ans.read_text(encoding='utf-8')), {'rc': 0, 'seconds': 0, 'usage': None, 'reported_model': 'manual', 'tool_events': 0, 'cost_usd': None}
 

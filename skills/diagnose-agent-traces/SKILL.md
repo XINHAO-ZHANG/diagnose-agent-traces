@@ -53,11 +53,11 @@ python3 scripts/pipeline.py --run RUN --base BASE --work WORK --name RUN_NAME --
     --annotate --backend manual --model YOUR_MODEL_NAME
 ```
 
-The command writes one prompt file for each unit and stops. It prints the folders. In each folder `requests/<uid>.txt` is a full prompt.
+The command writes the prompt of each unit and stops. It prints the folders. In each folder, `requests/<uid>.txt` has the instructions, and `requests/<uid>.packet.01.txt`, `.02.txt` and so on have the trace of the unit in readable parts (each part fits in one read; long lines are wrapped). The request file lists the parts.
 
 For each request file:
 
-1. Act as the annotator. Read the file. It has the instructions and the full trace of one unit.
+1. Act as the annotator. Read the request file, then **all** the packet parts it lists, in order, to the end. They have the instructions and the full trace of one unit. The request says "do not use tools": this does not apply to reading these files and writing the answer file.
 2. Answer with the JSON object only (no text around it, no markdown fence). Save it as `answers/<same name>.json` in the same folder.
 3. Do not read any other file: no other answers, no other pass, no earlier labels, no source code of this skill.
    Do not run code. The annotator must be blind and independent.
