@@ -92,8 +92,18 @@ def write_manual_request(outd, stem, msg):
     marker = '\n\n## UNIT PACKET\n\n'
     head, packet_json = msg.split(marker, 1)
     blocks = render_packet(json.loads(packet_json))
+    pieces = []
+    for b in blocks:        # a very long turn is split at line breaks, so that no part is too big for one read
+        if len(b) <= PART_CHARS:
+            pieces.append(b); continue
+        cur_lines, n = [], 0
+        for line in b.split('\n'):
+            if cur_lines and n + len(line) > PART_CHARS:
+                pieces.append('\n'.join(cur_lines)); cur_lines, n = [], 0
+            cur_lines.append(line); n += len(line) + 1
+        pieces.append('\n'.join(cur_lines))
     parts, cur, size = [], [], 0
-    for b in blocks:
+    for b in pieces:
         if cur and size + len(b) > PART_CHARS:
             parts.append(cur); cur, size = [], 0
         cur.append(b); size += len(b) + 2
